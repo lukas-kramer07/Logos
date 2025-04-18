@@ -12,11 +12,11 @@ const PageContainer = styled.div`
 
 const EditorContainer = styled.div`
     width: 816px;
-    max-height: 50vh;
     background-color: white;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
+    flex-direction: column;
 `;
 
 const Toolbar = styled.div`
@@ -60,14 +60,27 @@ const ToolbarButton = styled.button`
 
 const EditableArea = styled.div`
     padding: 16px;
-    min-height: 1056px;
+    min-height: 528px;
     outline: none;
     color: #374151;
+`;
+
+const PreviewArea = styled.pre`
+  margin: 16px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-all;
 `;
 
 const TextEditor: React.FC = () => {
     const editorRef = useRef<HTMLDivElement>(null);
     const [fontSize, setFontSize] = useState<number>(16);
+    const [htmlPreview, setHtmlPreview] = useState<string>('Start typing here...');
 
     const applyFormatting = (tag: 'b' | 'i' | 'u') => {
         const selection = window.getSelection();
@@ -121,6 +134,12 @@ const TextEditor: React.FC = () => {
         if (editorRef.current) {
             editorRef.current.style.fontSize = `${size}px`;
             editorRef.current.focus();
+        }
+    };
+
+    const handleInput = () => {
+        if (editorRef.current) {
+            setHtmlPreview(editorRef.current.innerHTML);
         }
     };
 
@@ -209,9 +228,12 @@ const TextEditor: React.FC = () => {
                             }
                         }
                     }}
+                    onInput={handleInput}
                 >
                 </EditableArea>
+                <PreviewArea>HTML string: {htmlPreview}</PreviewArea>
             </EditorContainer>
+
         </PageContainer>
     );
 };
