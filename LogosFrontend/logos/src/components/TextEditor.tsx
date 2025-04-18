@@ -80,7 +80,7 @@ const PreviewArea = styled.pre`
 const TextEditor: React.FC = () => {
     const editorRef = useRef<HTMLDivElement>(null);
     const [fontSize, setFontSize] = useState<number>(16);
-    const [htmlPreview, setHtmlPreview] = useState<string>('Start typing here...');
+    const [htmlPreview, setHtmlPreview] = useState<string>('');
 
     const applyFormatting = (tag: 'b' | 'i' | 'u') => {
         const selection = window.getSelection();
