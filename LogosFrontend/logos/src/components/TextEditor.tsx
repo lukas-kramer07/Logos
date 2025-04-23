@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useEffect,useState } from 'react';
 import styled from 'styled-components';
 
 const PageContainer = styled.div`
@@ -63,6 +63,10 @@ const EditableArea = styled.div`
     min-height: 528px;
     outline: none;
     color: #374151;
+
+    div{
+        margin-bottom: 16px; /*spacing between paragraphs*/
+    }
 `;
 
 const PreviewArea = styled.pre`
@@ -79,6 +83,17 @@ const PreviewArea = styled.pre`
 
 const TextEditor: React.FC = () => {
     const editorRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+        const editor = editorRef.current;
+        if (editor && editor.innerHTML.trim() === '') {
+          const firstDiv = document.createElement('div');
+          const br = document.createElement('br');
+          firstDiv.appendChild(br);
+          editor.appendChild(firstDiv);
+        }
+      }, []);
+
     const [fontSize, setFontSize] = useState<number>(16);
     const [htmlPreview, setHtmlPreview] = useState<string>('');
 
@@ -216,17 +231,30 @@ const TextEditor: React.FC = () => {
                     contentEditable
                     style={{ fontSize: `${fontSize}px` }}
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            const br = document.createElement('br');
+                        if (e.key === 'Enter' && e.shiftKey) {
+                            e.preventDefault();
+                        
                             const selection = window.getSelection();
-                            if (selection && selection.rangeCount > 0) {
-                                const range = selection.getRangeAt(0);
-                                range.insertNode(br);
-                                range.setStartAfter(br);
-                                range.setEndAfter(br);
-                                e.preventDefault();
-                            }
+                            if (!selection || selection.rangeCount === 0) return;
+                        
+                            const range = selection.getRangeAt(0);
+                            
+                            const br = document.createElement('br');
+                            const zwsp = document.createTextNode('\u200B'); // invisible char to hold caret
+                        
+                            range.deleteContents();
+                            range.insertNode(br);
+                            range.collapse(false);
+                            range.insertNode(zwsp);
+                        
+                            // Move caret after zwsp
+                            range.setStartAfter(zwsp);
+                            range.setEndAfter(zwsp);
+                            
+                            selection.removeAllRanges();
+                            selection.addRange(range);
                         }
+                        
                     }}
                     onInput={handleInput}
                 >
